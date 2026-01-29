@@ -4,8 +4,8 @@ import time
 
 # === 🎨 页面配置 ===
 st.set_page_config(
-    page_title="🦖 爸爸的算术大冒险",
-    page_icon="🚜",
+    page_title="🦖 爸爸的算术大冒险 v2.0",
+    page_icon="🤖",
     layout="centered"
 )
 
@@ -27,12 +27,12 @@ if 'show_reward' not in st.session_state:
 
 # === ⚙️ 爸爸的控制台 (侧边栏) ===
 with st.sidebar:
-    st.header("⚙️ 难度设置")
-    max_num = st.slider("最大数字 (几以内加减法)", 5, 50, 10)
-    allow_sub = st.checkbox("启用减法", value=False)
+    st.header("⚙️ 冒险难度")
+    max_num = st.slider("数字范围", 5, 100, 10)
+    allow_sub = st.checkbox("开启减法挑战", value=False)
     
-    if st.button("重置分数"):
-        for key in st.session_state.keys():
+    if st.button("重置冒险进度"):
+        for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
 
@@ -56,85 +56,82 @@ def generate_question():
     st.session_state.answered_correctly = False
     st.session_state.show_reward = False
 
-# 初次加载出题
 if st.session_state.total_count == 0 and st.session_state.current_num1 == 0:
     generate_question()
 
-# === 🎉 奖励展示系统 (加入了新彩蛋角色) ===
+# === 🎉 动画片角色奖励库 (重点更新) ===
 def show_random_reward():
-    # 儿子喜欢的元素列表 + 新增彩蛋
+    # 结合了炫卡斗士、托宝战士、迷你特工队、咖宝车神等角色
     rewards = [
-        {"icon": "🛡️", "msg": "炫卡斗士：出击！正义的胜利！", "effect": "balloons"},
-        {"icon": "🤖", "msg": "托宝战士：变换形态！你太强了！", "effect": "balloons"},
-        {"icon": "🎧", "msg": "节奏盒子：嘿哈！这题感太棒了！", "effect": "snow"},
-        {"icon": "🦾", "msg": "超级机器人：逻辑电路连接成功！", "effect": "balloons"},
-        {"icon": "🐍", "msg": "巨大的蟒蛇：嘶~ 你的脑筋转得真快！", "effect": "snow"},
-        {"icon": "🦖", "msg": "霸王龙：吼！你是算术之王！", "effect": "balloons"},
-        {"icon": "🚜", "msg": "挖掘机：哔哔！挖到一个满分宝藏！", "effect": "snow"},
-        {"icon": "🚒", "msg": "消防车：呜呜呜！你是灭火小英雄！", "effect": "balloons"},
+        {"icon": "🛡️", "name": "炫卡斗士", "msg": "激战炫卡！正义之魂在燃烧！", "color": "#FF3D00"},
+        {"icon": "🚗", "name": "咖宝车神", "msg": "咖宝车神，即刻变换！出发救援！", "color": "#2979FF"},
+        {"icon": "🦊", "name": "迷你特工队", "msg": "特工召唤！弗特、露西为你点赞！", "color": "#D50000"},
+        {"icon": "🤖", "name": "托宝战士", "msg": "托宝战士，变型！你是最棒的搭档！", "color": "#FFAB00"},
+        {"icon": "⚡", "name": "迷你特工", "msg": "最强战士！能量全开，耶！", "color": "#00E5FF"},
+        {"icon": "🏎️", "name": "咖宝车神", "msg": "超级变换！你是计算小能手！", "color": "#76FF03"},
+        {"icon": "🦸", "name": "炫卡斗士", "msg": "英雄出击！下一题也难不倒你！", "color": "#AA00FF"},
     ]
     
     choice = random.choice(rewards)
     
-    # 播放特效
-    if choice["effect"] == "balloons":
+    # 播放全屏效果
+    if random.choice([True, False]):
         st.balloons()
     else:
         st.snow()
     
-    # 弹窗提示
-    st.toast(choice["msg"], icon=choice["icon"])
-    
-    # 中央动画
+    # 炫酷的中央提示
     st.markdown(f"""
-        <div style="text-align: center; animation: hero-bounce 0.8s infinite;">
-            <div style="font-size: 120px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.2));">{choice['icon']}</div>
-            <h1 style="color: #FF4B4B; font-family: 'MicroSoft YaHei';">{choice['msg']}</h1>
+        <div style="text-align: center; padding: 20px; border-radius: 20px; background: rgba(255,255,255,0.1); border: 3px solid {choice['color']}; animation: hero-pop 0.6s ease-out;">
+            <div style="font-size: 110px; margin-bottom: 10px;">{choice['icon']}</div>
+            <h2 style="color: {choice['color']}; font-family: 'MicroSoft YaHei';">{choice['name']}</h2>
+            <h3 style="color: #333;">{choice['msg']}</h3>
         </div>
         <style>
-        @keyframes hero-bounce {{
-            0%, 100% {{transform: scale(1);}}
-            50% {{transform: scale(1.1) rotate(5deg);}}
+        @keyframes hero-pop {{
+            0% {{ transform: scale(0.5); opacity: 0; }}
+            80% {{ transform: scale(1.1); opacity: 1; }}
+            100% {{ transform: scale(1); }}
         }}
         </style>
     """, unsafe_allow_html=True)
+    st.toast(f"{choice['name']} 发来贺电！", icon=choice["icon"])
 
 # === 🖥️ 主界面 ===
-st.title("🦖 算术大冒险")
+st.title("🌟 英雄算术大冒险")
 
-# 顶部状态栏
-col1, col2 = st.columns(2)
-col1.metric("🌟 获得星星", st.session_state.score)
-col2.metric("📝 完成题目", st.session_state.total_count)
-st.progress(min(st.session_state.score * 5, 100)) # 进度条稍微调慢一点，让挑战更长
+# 英雄得分板
+cols = st.columns(3)
+cols[0].metric("⭐ 英雄勋章", st.session_state.score)
+cols[1].metric("⚔️ 击败怪兽", st.session_state.total_count)
+cols[2].write(f"### 难度: {max_num}")
+st.progress(min(st.session_state.score * 10, 100))
 
 st.divider()
 
-# 显示题目
+# 题目显示
 q_str = f"{st.session_state.current_num1} {st.session_state.operator} {st.session_state.current_num2} = ?"
-st.markdown(f"<h1 style='text-align: center; font-size: 100px; color: #1E88E5;'>{q_str}</h1>", unsafe_allow_html=True)
+st.markdown(f"<div style='text-align: center;'><span style='font-size: 100px; font-weight: bold; color: #448AFF; border-bottom: 5px solid #448AFF;'>{q_str}</span></div>", unsafe_allow_html=True)
+st.write("") # 留白
 
 # === 🧠 答题逻辑区 ===
 if not st.session_state.answered_correctly:
     
+    # 即使在答题状态，如果刚刚答对了刷新回来，也会显示奖励
     if st.session_state.show_reward:
         show_random_reward()
         st.session_state.show_reward = False
 
-    with st.form(key='math_form', clear_on_submit=True):
-        st.write("### 👇 请输入答案：")
-        user_ans = st.number_input("答案是几？", value=None, min_value=0, max_value=100, step=1, label_visibility="collapsed", placeholder="？")
-        submit = st.form_submit_button("🚀 发射答案！", use_container_width=True, type="primary")
+    with st.form(key='hero_form', clear_on_submit=True):
+        st.write("### ⌨️ 请输入英雄答案：")
+        user_ans = st.number_input("答案", value=None, min_value=0, max_value=200, step=1, label_visibility="collapsed", placeholder="输入答案...")
+        submit = st.form_submit_button("🔥 确认发射！", use_container_width=True, type="primary")
         
     if submit:
         if user_ans is None:
-            st.warning("要先填入数字哦！")
+            st.warning("队长，请输入答案再发射！")
         else:
-            if st.session_state.operator == '+':
-                real_ans = st.session_state.current_num1 + st.session_state.current_num2
-            else:
-                real_ans = st.session_state.current_num1 - st.session_state.current_num2
-                
+            real_ans = st.session_state.current_num1 + st.session_state.current_num2 if st.session_state.operator == '+' else st.session_state.current_num1 - st.session_state.current_num2
             if user_ans == real_ans:
                 st.session_state.score += 1
                 st.session_state.total_count += 1
@@ -142,18 +139,17 @@ if not st.session_state.answered_correctly:
                 st.session_state.show_reward = True 
                 st.rerun()
             else:
-                st.error(f"😅 哎呀，再算一遍，你可以的！")
+                st.error(f"❌ 能量不足！再算一次，你可以的！")
 
 else:
-    if st.session_state.show_reward:
-         show_random_reward()
-         st.session_state.show_reward = False
-
-    st.success("✨ 能量充能完毕！")
+    # 答对状态显示
+    show_random_reward()
+    st.session_state.show_reward = False
     
-    if st.button("👉 继续挑战下一关！(Next)", type="primary", use_container_width=True):
+    st.success("🎉 完美一击！")
+    if st.button("👉 前往下一关 (Next Mission)", type="primary", use_container_width=True):
         generate_question()
         st.rerun()
 
 st.divider()
-st.caption("❤️ 爸爸为宝贝开发的专属游戏 | 炫卡斗士与你并肩作战")
+st.caption("🛡️ 专属特工训练器 | 爸爸牌出品")
