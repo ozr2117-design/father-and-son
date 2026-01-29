@@ -88,3 +88,72 @@ def show_random_reward():
     # 中央动画
     st.markdown(f"""
         <div style="text-align: center; animation: hero-bounce 0.8s infinite;">
+            <div style="font-size: 120px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.2));">{choice['icon']}</div>
+            <h1 style="color: #FF4B4B; font-family: 'MicroSoft YaHei';">{choice['msg']}</h1>
+        </div>
+        <style>
+        @keyframes hero-bounce {{
+            0%, 100% {{transform: scale(1);}}
+            50% {{transform: scale(1.1) rotate(5deg);}}
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+
+# === 🖥️ 主界面 ===
+st.title("🦖 算术大冒险")
+
+# 顶部状态栏
+col1, col2 = st.columns(2)
+col1.metric("🌟 获得星星", st.session_state.score)
+col2.metric("📝 完成题目", st.session_state.total_count)
+st.progress(min(st.session_state.score * 5, 100)) # 进度条稍微调慢一点，让挑战更长
+
+st.divider()
+
+# 显示题目
+q_str = f"{st.session_state.current_num1} {st.session_state.operator} {st.session_state.current_num2} = ?"
+st.markdown(f"<h1 style='text-align: center; font-size: 100px; color: #1E88E5;'>{q_str}</h1>", unsafe_allow_html=True)
+
+# === 🧠 答题逻辑区 ===
+if not st.session_state.answered_correctly:
+    
+    if st.session_state.show_reward:
+        show_random_reward()
+        st.session_state.show_reward = False
+
+    with st.form(key='math_form', clear_on_submit=True):
+        st.write("### 👇 请输入答案：")
+        user_ans = st.number_input("答案是几？", value=None, min_value=0, max_value=100, step=1, label_visibility="collapsed", placeholder="？")
+        submit = st.form_submit_button("🚀 发射答案！", use_container_width=True, type="primary")
+        
+    if submit:
+        if user_ans is None:
+            st.warning("要先填入数字哦！")
+        else:
+            if st.session_state.operator == '+':
+                real_ans = st.session_state.current_num1 + st.session_state.current_num2
+            else:
+                real_ans = st.session_state.current_num1 - st.session_state.current_num2
+                
+            if user_ans == real_ans:
+                st.session_state.score += 1
+                st.session_state.total_count += 1
+                st.session_state.answered_correctly = True 
+                st.session_state.show_reward = True 
+                st.rerun()
+            else:
+                st.error(f"😅 哎呀，再算一遍，你可以的！")
+
+else:
+    if st.session_state.show_reward:
+         show_random_reward()
+         st.session_state.show_reward = False
+
+    st.success("✨ 能量充能完毕！")
+    
+    if st.button("👉 继续挑战下一关！(Next)", type="primary", use_container_width=True):
+        generate_question()
+        st.rerun()
+
+st.divider()
+st.caption("❤️ 爸爸为宝贝开发的专属游戏 | 炫卡斗士与你并肩作战")
